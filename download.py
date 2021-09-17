@@ -61,7 +61,7 @@ def check_gecko_driver():
         os.mkdir(local_platform_path)
 
     if not os.path.isfile(local_driver_path):
-        print('Downloading gecko driver...', file=sys.stderr)
+        print('Downloading gecko driver...', local_driver_path)
         data_resp = requests.get(url, stream=True)
         file_name = url.split('/')[-1]
         tgt_file = os.path.join(local_platform_path, file_name)
@@ -95,7 +95,7 @@ if __name__ == '__main__':
     args = args_parser.parse_args()
     args.no_headless = True
     if args.max_retries <= 0 or args.timeout <= 0:
-        print('Invalid arguments', file=sys.stderr)
+        print('Invalid arguments', args)
         exit(1)
 
     check_gecko_driver()
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     if not args.no_headless:
         ff_options.add_argument('--headless')
 
-    print('Downloading the playlist, please wait...', file=sys.stderr)
+    print('Downloading the playlist, please wait...')
 
     firefox_profile = webdriver.FirefoxProfile()
     firefox_profile.set_preference('permissions.default.image', 2)
@@ -121,8 +121,8 @@ if __name__ == '__main__':
 
     if args.proxy:
         set_seleniumwire_options['proxy'] = {
-            'http': f'http://{args.proxy}',
-            'https': f'https://{args.proxy}'
+            'http': 'http://{args.proxy}',
+            'https': 'https://{args.proxy}'
         }
 
     # pylint: disable=unexpected-keyword-arg
@@ -160,7 +160,7 @@ if __name__ == '__main__':
                 try:
                     iframe = driver.find_element_by_css_selector(IFRAME_CSS_SELECTOR)
                 except NoSuchElementException:
-                    print('[%d/%d] Video frame is not found for channel %s' % (item_n + 1, len(page_links), channel_list[item_n]), file=sys.stderr)
+                    print('[%d/%d] Video frame is not found for channel %s' % (item_n + 1, len(page_links), channel_list[item_n]))
                     break
 
                 # Detect VPN-required channels
@@ -174,7 +174,7 @@ if __name__ == '__main__':
                     driver.switch_to.default_content()
 
                 if need_vpn:
-                    print('[%d/%d] Channel %s needs VPN to be grabbed, skipping' % (item_n + 1, len(page_links), channel_list[item_n]), file=sys.stderr)
+                    print('[%d/%d] Channel %s needs VPN to be grabbed, skipping' % (item_n + 1, len(page_links), channel_list[item_n]))
                     break
 
                 # close popup if it shows up
@@ -194,7 +194,7 @@ if __name__ == '__main__':
                 if playlist:
                     video_link = playlist.path
                     video_links.append((channel_list[item_n], video_link))
-                    print('[%d/%d] Successfully collected link for %s' % (item_n + 1, len(page_links), channel_list[item_n]), file=sys.stderr)
+                    print('[%d/%d] Successfully collected link for %s' % (item_n + 1, len(page_links), channel_list[item_n]))
                 else:
                     video_link = ''
                     sleep(1.5)
@@ -207,13 +207,13 @@ if __name__ == '__main__':
             except KeyboardInterrupt:
                 exit(1)
             except:
-                print('[%d] Retry link for %s' % (retry, channel_list[item_n]), file=sys.stderr)
+                print('[%d] Retry link for %s' % (retry, channel_list[item_n]))
                 retry += 1
                 if retry > args.max_retries:
-                    print('[%d/%d] Failed to collect link for %s' % (item_n + 1, len(page_links), channel_list[item_n]), file=sys.stderr)
+                    print('[%d/%d] Failed to collect link for %s' % (item_n + 1, len(page_links), channel_list[item_n]))
                     break
 
-    print('Generating ustvgo.m3u8 playlist...', file=sys.stderr)
+    print('Generating ustvgo.m3u8 playlist...')
     with open('ustvgo.m3u8', 'w') as file:
         file.write('#EXTM3U\n\n')
         for name, url in video_links:
